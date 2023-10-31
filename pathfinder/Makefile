@@ -13,9 +13,11 @@ $(NAME): src/*.c
 
 clean:
 	rm -rf obj
+	make -C libmx clean
 
 uninstall: clean
 	rm -rf $(NAME)
+	make -C libmx uninstall
 
 reinstall: uninstall $(NAME)
 
