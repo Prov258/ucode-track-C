@@ -1,14 +1,27 @@
 CC = clang
 CCFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic
 
+SRC_DIR = src
+OBJ_DIR = obj
+INC_DIR = inc
+
+SRC = $(wildcard $(SRC_DIR)/*.c)
+OBJ = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC:%.c=%.o))
+
+NAME = libmx
+
 LIB_NAME = libmx.a
 
-all: LIBMX
+.PHONY: all clean uninstall reinstall
 
-LIBMX: src/*.c
-	mkdir -p obj
-	cd obj && $(CC) $(CCFLAGS) -c ../src/*.c
-	ar -rcs $(LIB_NAME) obj/*.o
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	ar -rcs $(LIB_NAME) $(OBJ)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(OBJ_DIR)
+	$(CC) $(CCFLAGS) -c $^ -o $@
 
 clean:
 	rm -rf obj

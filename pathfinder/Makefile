@@ -1,23 +1,39 @@
 CC = clang
 CCFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic
 
+SRC_DIR = src
+OBJ_DIR = obj
+INC_DIR = inc
+
+SRC = $(wildcard $(SRC_DIR)/*.c)
+OBJ = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC:%.c=%.o))
+
+LIB_DIR = libmx
+LIB = libmx.a
+
 NAME = pathfinder
 
-all: $(NAME)
+.PHONY: all clean uninstall reinstall
 
-$(NAME): src/*.c
-	cd libmx && make
-	mkdir -p obj
-	cd obj && $(CC) $(CCFLAGS) -c ../src/*.c -I../inc -I../libmx/inc
-	$(CC) -o $(NAME) obj/*.o -Llibmx -lmx
+all: $(LIB) $(NAME)
+
+$(LIB):
+	make -C $(LIB_DIR)
+
+$(NAME): $(OBJ)
+	$(CC) -o $(NAME) $^ -L $(LIB_DIR) -lmx
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(OBJ_DIR)
+	$(CC) $(CCFLAGS) -c $^ -I$(INC_DIR) -I$(LIB_DIR)/$(INC_DIR) -o $@
 
 clean:
-	rm -rf obj
-	make -C libmx clean
+	rm -rf $(OBJ_DIR)
+	make -C $(LIB_DIR) clean
 
 uninstall: clean
 	rm -rf $(NAME)
-	make -C libmx uninstall
+	make -C $(LIB_DIR) uninstall
 
 reinstall: uninstall $(NAME)
 
