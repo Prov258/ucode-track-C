@@ -5,29 +5,30 @@ SRC_DIR = src
 OBJ_DIR = obj
 INC_DIR = inc
 
+INC = $(wildcard $(INC_DIR)/*.h)
 SRC = $(wildcard $(SRC_DIR)/*.c)
-OBJ = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC:%.c=%.o))
+OBJ = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC))
 
-NAME = libmx
-
-LIB_NAME = libmx.a
+NAME = libmx.a
 
 .PHONY: all clean uninstall reinstall
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	ar -rcs $(LIB_NAME) $(OBJ)
+$(NAME): $(OBJ_DIR) $(OBJ)
+	ar -rcs $(NAME) $(OBJ)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
-	$(CC) $(CCFLAGS) -c $^ -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC)
+	$(CC) $(CCFLAGS) -I $(INC_DIR) -c $< -o $@
 
 clean:
-	rm -rf obj
+	rm -rf $(OBJ_DIR)
 
 uninstall: clean
-	rm -rf $(LIB_NAME)
+	rm -rf $(NAME)
 
-reinstall: uninstall LIBMX
+reinstall: uninstall $(NAME)
 
